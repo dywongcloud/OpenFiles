@@ -1,0 +1,68 @@
+# OpenFiles — Tencent Cloud COS backend configuration
+
+[backend]
+type = "cos"
+
+[cos]
+# Required
+secret_id = "YOUR_TENCENT_SECRET_ID"
+secret_key = "YOUR_TENCENT_SECRET_KEY"
+
+# COS bucket name (no scheme)
+bucket = "your-bucket-name-1234567890"
+
+# Region (must match bucket region)
+region = "ap-guangzhou"
+
+# Optional: custom endpoint (auto-derived if not set)
+# format: https://<bucket>.cos.<region>.myqcloud.com
+endpoint = ""
+
+# Optional: use HTTPS (default true)
+secure = true
+
+# Optional: enable accelerated endpoint
+# https://<bucket>.cos.accelerate.myqcloud.com
+accelerate = false
+
+# Optional: path-style access (rarely needed)
+# https://cos.<region>.myqcloud.com/<bucket>
+path_style = false
+
+# Optional: session token (for STS temporary creds)
+session_token = ""
+
+# Timeout + retry tuning
+timeout_secs = 30
+max_retries = 5
+
+# Multipart upload tuning
+multipart_threshold = 8388608      # 8MB
+multipart_chunk_size = 8388608     # 8MB
+max_concurrency = 8
+
+# Consistency behavior (COS is strongly consistent for new objects)
+consistency = "strong"
+
+# Metadata sidecar prefix (for POSIX emulation)
+metadata_prefix = ".ofs_meta/"
+
+# Directory marker support
+enable_dir_markers = true
+
+# Cache settings (local hot cache like S3 Files)
+[cache]
+enabled = true
+path = "./.openfiles_cache"
+max_size_mb = 10240        # 10GB
+eviction_policy = "lru"
+
+# Sync behavior (mirrors S3 Files semantics)
+[sync]
+import_on_read = true
+export_interval_secs = 60
+conflict_resolution = "cos_wins"   # COS is source of truth
+
+# Logging
+[logging]
+level = "info"
