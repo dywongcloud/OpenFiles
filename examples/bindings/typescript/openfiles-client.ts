@@ -6,6 +6,20 @@ export interface DirEntry {
   kind: FileKind;
   size: number;
 }
+type WriteBody = string | Uint8Array | ArrayBuffer | Blob;
+
+function toBodyInit(body: WriteBody): BodyInit {
+  if (typeof body === "string") return body;
+  if (body instanceof Blob) return body;
+  if (body instanceof ArrayBuffer) return body;
+
+  // Uint8Array -> ArrayBuffer slice with correct byteOffset/length
+  return body.buffer.slice(
+    body.byteOffset,
+    body.byteOffset + body.byteLength,
+  ) as ArrayBuffer;
+}
+
 
 export interface FileStat extends DirEntry {
   key: string;
@@ -46,11 +60,25 @@ export class OpenFilesClient {
     return new Uint8Array(await res.arrayBuffer());
   }
 
-  async write(path: string, data: Uint8Array | string): Promise<void> {
-    const res = await fetch(this.path("/v1/write", path), { method: "PUT", body: data });
-    if (!res.ok) throw new Error(await res.text());
-  }
+  async  write(
+  baseUrl: string,
+  path: string,
+  body: WriteBody,
+): Promise<void> {
+  const res = await fetch(`${baseUrl}/v1/file/${encodeURIComponent(path)}`, {
+    method: "PUT",
+    body: toBodyInit(body),
+    headers: {
+      "content-type": typeof body === "string"
+        ? "text/plain; charset=utf-8"
+        : "application/octet-stream",
+    },
+  });
 
+  if (!res.ok) {
+    throw new Error(`OpenFiles write failed: ${res.status} ${await res.text()}`);
+  }
+}
   async delete(path: string): Promise<void> {
     const res = await fetch(this.path("/v1/delete", path), { method: "DELETE" });
     if (!res.ok) throw new Error(await res.text());
