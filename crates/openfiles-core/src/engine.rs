@@ -140,7 +140,10 @@ impl OpenFilesEngine {
         }
         let dir_prefix_key = format!("{}/", key.trim_end_matches('/'));
         let entries = self.backend.list(&dir_prefix_key).await?;
-        if entries.iter().any(|m| !is_internal_key(&m.key)) {
+        if entries
+            .iter()
+            .any(|m| !m.key.ends_with('/') && !is_internal_key(&m.key))
+        {
             let posix = PosixMetadata::new_dir(display_path(&normalized));
             let entry = CacheEntry::from_posix(normalized.clone(), dir_prefix_key, posix, 0);
             self.cache.put_entry(entry.clone()).await?;
@@ -159,7 +162,7 @@ impl OpenFilesEngine {
         let mut dirs = HashSet::<String>::new();
 
         for obj in objects {
-            if is_internal_key(&obj.key) {
+            if obj.key.ends_with('/') || is_internal_key(&obj.key) {
                 continue;
             }
             let rel = self.path_from_key(&obj.key);
