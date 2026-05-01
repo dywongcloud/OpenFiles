@@ -166,7 +166,12 @@ impl OpenFilesEngine {
                 continue;
             }
             let rel = self.path_from_key(&obj.key);
-            if rel.is_empty() || !rel.starts_with(&dir_prefix_path) {
+
+            if rel.is_empty()
+                || rel == ".openfiles"
+                || rel.starts_with(".openfiles/")
+                || !rel.starts_with(&dir_prefix_path)
+            {
                 continue;
             }
             let child_rel = &rel[dir_prefix_path.len()..];
