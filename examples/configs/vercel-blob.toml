@@ -1,0 +1,23 @@
+fs_id = "ofss-vercel-prod"
+name = "vercel-blob-openfiles"
+object_prefix = ""
+
+[backend]
+provider = "vercel-blob"
+token = "REPLACE_ME_BLOB_READ_WRITE_TOKEN"
+
+[cache]
+dir = "/var/lib/openfiles/cache/vercel"
+direct_read_threshold_bytes = 1048576
+capacity_bytes = 274877906944
+
+[sync]
+export_batch_window_secs = 60
+
+[[sync.import_rules]]
+prefix = ""
+trigger = "on-directory-first-access"
+size_less_than = 131072
+
+[sync.expiration]
+days_after_last_access = 30

@@ -1,0 +1,16 @@
+[package]
+name = "openfiles-wasmcloud-host"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "openfiles-wasmcloud-host"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+openfiles-core = { path = "../openfiles-core", features = ["opendal-backend"] }
+tokio.workspace = true
+tracing-subscriber.workspace = true

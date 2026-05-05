@@ -1,0 +1,33 @@
+[package]
+name = "openfiles-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[features]
+default = ["opendal-backend"]
+opendal-backend = ["dep:opendal"]
+
+[dependencies]
+anyhow.workspace = true
+async-trait.workspace = true
+bytes.workspace = true
+chrono.workspace = true
+dashmap.workspace = true
+futures.workspace = true
+hex.workspace = true
+opendal = { workspace = true, optional = true }
+parking_lot.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+toml.workspace = true
+tracing.workspace = true
+urlencoding.workspace = true
+
+[dev-dependencies]
+tempfile = "3"

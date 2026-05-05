@@ -1,0 +1,27 @@
+fs_id = "ofss-minio-dev"
+name = "minio-openfiles"
+object_prefix = ""
+
+[backend]
+provider = "minio"
+bucket = "openfiles"
+endpoint = "http://127.0.0.1:9000"
+region = "us-east-1"
+access_key_id = "minioadmin"
+secret_access_key = "minioadmin"
+
+[cache]
+dir = "./.openfiles-cache-minio"
+direct_read_threshold_bytes = 1048576
+capacity_bytes = 68719476736
+
+[sync]
+export_batch_window_secs = 60
+
+[[sync.import_rules]]
+prefix = ""
+trigger = "on-directory-first-access"
+size_less_than = 131072
+
+[sync.expiration]
+days_after_last_access = 30

@@ -1,0 +1,27 @@
+fs_id = "ofss-netapp-prod"
+name = "netapp-storagegrid-openfiles"
+object_prefix = ""
+
+[backend]
+provider = "netapp-storage-grid"
+bucket = "REPLACE_ME_BUCKET"
+endpoint = "https://s3.REPLACE_ME_STORAGEGRID.example.com"
+region = "us-east-1"
+access_key_id = "REPLACE_ME"
+secret_access_key = "REPLACE_ME"
+
+[cache]
+dir = "/var/lib/openfiles/cache/netapp"
+direct_read_threshold_bytes = 1048576
+capacity_bytes = 1099511627776
+
+[sync]
+export_batch_window_secs = 60
+
+[[sync.import_rules]]
+prefix = ""
+trigger = "on-directory-first-access"
+size_less_than = 131072
+
+[sync.expiration]
+days_after_last_access = 30

@@ -1,0 +1,24 @@
+[package]
+name = "openfiles-fuse"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "openfiles-fuse"
+path = "src/main.rs"
+
+[features]
+default = []
+fuse = ["dep:fuser", "dep:libc"]
+
+[dependencies]
+anyhow.workspace = true
+bytes.workspace = true
+clap.workspace = true
+fuser = { workspace = true, optional = true }
+libc = { workspace = true, optional = true }
+openfiles-core = { path = "../openfiles-core", features = ["opendal-backend"] }
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true

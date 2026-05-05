@@ -1,0 +1,16 @@
+# Reference host configuration. Adapt to your wasmCloud operator/Helm values.
+apiVersion: k8s.wasmcloud.dev/v1alpha1
+kind: WasmCloudHostConfig
+metadata:
+  name: openfiles-hostgroup
+spec:
+  hostLabels:
+    openfiles: "true"
+  workload:
+    localResources:
+      volumeMounts:
+        - name: openfiles-cache
+          mountPath: /mnt/openfiles
+          readOnly: false
+      env:
+        OPENFILES_MOUNT: /mnt/openfiles

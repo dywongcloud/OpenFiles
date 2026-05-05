@@ -1,0 +1,6 @@
+/target/
+/.openfiles-cache*/
+/object-store/
+/openfiles.toml
+*.log
+.DS_Store

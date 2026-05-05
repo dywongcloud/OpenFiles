@@ -1,0 +1,23 @@
+fs_id = "ofss-local-dev"
+name = "local-openfiles"
+object_prefix = ""
+
+[backend]
+provider = "local-fs"
+root = "./object-store"
+
+[cache]
+dir = "./.openfiles-cache"
+direct_read_threshold_bytes = 1048576
+capacity_bytes = 68719476736
+
+[sync]
+export_batch_window_secs = 60
+
+[[sync.import_rules]]
+prefix = ""
+trigger = "on-directory-first-access"
+size_less_than = 131072
+
+[sync.expiration]
+days_after_last_access = 30

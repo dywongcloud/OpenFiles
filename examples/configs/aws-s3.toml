@@ -1,0 +1,33 @@
+fs_id = "ofss-aws-prod"
+name = "aws-s3-openfiles"
+object_prefix = ""
+
+[backend]
+provider = "aws-s3"
+bucket = "REPLACE_ME_BUCKET"
+region = "us-east-1"
+# Prefer IAM role/instance profile. Use keys only for local tests.
+# access_key_id = "REPLACE_ME"
+# secret_access_key = "REPLACE_ME"
+# session_token = "REPLACE_ME"
+
+[cache]
+dir = "/var/lib/openfiles/cache/aws"
+direct_read_threshold_bytes = 1048576
+capacity_bytes = 1099511627776
+
+[sync]
+export_batch_window_secs = 60
+
+[[sync.import_rules]]
+prefix = ""
+trigger = "on-directory-first-access"
+size_less_than = 131072
+
+[[sync.import_rules]]
+prefix = "datasets/"
+trigger = "on-file-access"
+size_less_than = 0
+
+[sync.expiration]
+days_after_last_access = 30

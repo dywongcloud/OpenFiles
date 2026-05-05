@@ -1,0 +1,27 @@
+fs_id = "ofss-azure-prod"
+name = "azure-blob-openfiles"
+object_prefix = ""
+
+[backend]
+provider = "azure-blob"
+container = "REPLACE_ME_CONTAINER"
+endpoint = "https://REPLACE_ME_ACCOUNT.blob.core.windows.net"
+account_name = "REPLACE_ME_ACCOUNT"
+# account_key = "REPLACE_ME"
+# sas_token = "REPLACE_ME"
+
+[cache]
+dir = "/var/lib/openfiles/cache/azure"
+direct_read_threshold_bytes = 1048576
+capacity_bytes = 1099511627776
+
+[sync]
+export_batch_window_secs = 60
+
+[[sync.import_rules]]
+prefix = ""
+trigger = "on-directory-first-access"
+size_less_than = 131072
+
+[sync.expiration]
+days_after_last_access = 30

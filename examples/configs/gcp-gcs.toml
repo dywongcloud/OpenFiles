@@ -1,0 +1,25 @@
+fs_id = "ofss-gcp-prod"
+name = "gcs-openfiles"
+object_prefix = ""
+
+[backend]
+provider = "gcp-gcs"
+bucket = "REPLACE_ME_BUCKET"
+# credential_path = "/var/run/secrets/gcp/service-account.json"
+# credential = '{"type":"service_account", ...}'
+
+[cache]
+dir = "/var/lib/openfiles/cache/gcp"
+direct_read_threshold_bytes = 1048576
+capacity_bytes = 1099511627776
+
+[sync]
+export_batch_window_secs = 60
+
+[[sync.import_rules]]
+prefix = ""
+trigger = "on-directory-first-access"
+size_less_than = 131072
+
+[sync.expiration]
+days_after_last_access = 30

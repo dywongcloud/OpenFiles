@@ -1,0 +1,7 @@
+package openfiles:examples;
+
+world http-list-files {
+  import wasi:filesystem/types@0.2.0;
+  import wasi:filesystem/preopens@0.2.0;
+  export wasi:http/incoming-handler@0.2.0;
+}

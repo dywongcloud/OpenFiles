@@ -1,0 +1,88 @@
+package openfiles:fs@0.1.0;
+
+interface types {
+  enum file-kind {
+    file,
+    directory,
+    symlink,
+  }
+
+  record file-stat {
+    path: string,
+    kind: file-kind,
+    size: u64,
+    mode: u32,
+    uid: u32,
+    gid: u32,
+    mtime-ns: u64,
+    ctime-ns: u64,
+    cached: bool,
+    dirty: bool,
+    version: option<string>,
+    etag: option<string>,
+  }
+
+  record dir-entry {
+    name: string,
+    path: string,
+    kind: file-kind,
+    size: u64,
+  }
+
+  enum import-trigger {
+    on-directory-first-access,
+    on-file-access,
+  }
+
+  record import-rule {
+    prefix: string,
+    trigger: import-trigger,
+    size-less-than: u64,
+  }
+
+  record sync-config {
+    direct-read-threshold-bytes: u64,
+    export-batch-window-secs: u32,
+    expiration-days: u32,
+    import-rules: list<import-rule>,
+  }
+
+  variant error {
+    invalid-path(string),
+    not-found(string),
+    conflict(string),
+    unsupported(string),
+    storage(string),
+    internal(string),
+  }
+}
+
+interface files {
+  use types.{file-stat, dir-entry, error};
+
+  stat: func(path: string) -> result<file-stat, error>;
+  list-dir: func(path: string) -> result<list<dir-entry>, error>;
+  read-range: func(path: string, offset: u64, len: u64) -> result<list<u8>, error>;
+  write-file: func(path: string, data: list<u8>) -> result<_, error>;
+  delete-path: func(path: string) -> result<_, error>;
+  rename-path: func(from: string, to: string) -> result<_, error>;
+  flush: func() -> result<_, error>;
+}
+
+interface admin {
+  use types.{sync-config, error};
+
+  get-config: func() -> result<sync-config, error>;
+  put-config: func(config: sync-config) -> result<_, error>;
+  expire-cache: func() -> result<u64, error>;
+}
+
+world openfiles-client {
+  import files;
+  import admin;
+}
+
+world openfiles-provider {
+  export files;
+  export admin;
+}

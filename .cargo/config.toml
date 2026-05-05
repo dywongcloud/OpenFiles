@@ -1,0 +1,6 @@
+[alias]
+xtask = "run --package xtask --"
+
+[build]
+# Keep this empty by default so downstream users can compile on older distros
+# without turning every upstream warning into a hard error.

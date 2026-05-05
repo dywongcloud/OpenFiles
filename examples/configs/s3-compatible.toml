@@ -1,0 +1,27 @@
+fs_id = "ofss-s3-compatible"
+name = "s3-compatible-openfiles"
+object_prefix = ""
+
+[backend]
+provider = "s3-compatible"
+bucket = "REPLACE_ME_BUCKET"
+endpoint = "https://REPLACE_ME_ENDPOINT"
+region = "us-east-1"
+access_key_id = "REPLACE_ME"
+secret_access_key = "REPLACE_ME"
+
+[cache]
+dir = "/var/lib/openfiles/cache/s3-compatible"
+direct_read_threshold_bytes = 1048576
+capacity_bytes = 1099511627776
+
+[sync]
+export_batch_window_secs = 60
+
+[[sync.import_rules]]
+prefix = ""
+trigger = "on-directory-first-access"
+size_less_than = 131072
+
+[sync.expiration]
+days_after_last_access = 30

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openfiles-sidecar-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: openfiles-sidecar-demo }
+  template:
+    metadata:
+      labels: { app: openfiles-sidecar-demo }
+    spec:
+      volumes:
+        - name: openfiles-config
+          configMap: { name: openfiles-config }
+        - name: openfiles-cache
+          emptyDir: {}
+      containers:
+        - name: openfiles
+          image: ghcr.io/openfiles/openfiles:0.1.0
+          args: ["--config", "/etc/openfiles/openfiles.toml", "--listen", "0.0.0.0:8787"]
+          volumeMounts:
+            - { name: openfiles-config, mountPath: /etc/openfiles, readOnly: true }
+            - { name: openfiles-cache, mountPath: /var/lib/openfiles/cache }
+          ports:
+            - { name: http, containerPort: 8787 }
+        - name: app
+          image: curlimages/curl:latest
+          command: ["/bin/sh", "-c", "while true; do curl -s http://127.0.0.1:8787/v1/list || true; sleep 10; done"]
