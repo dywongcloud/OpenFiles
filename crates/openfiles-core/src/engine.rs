@@ -475,6 +475,53 @@ impl OpenFilesEngine {
         Ok(())
     }
 
+    /// Remove a clean cached path so another process can re-import the object-store copy.
+    /// Dirty entries are intentionally preserved to avoid losing unsynced local edits.
+    pub async fn invalidate_path(&self, path: &str) -> Result<bool> {
+        let normalized = normalize_path(path)?;
+        if normalized.is_empty() {
+            return Ok(false);
+        }
+
+        match self.cache.get(&normalized) {
+            Some(entry) if entry.dirty => Ok(false),
+            Some(_) => {
+                self.cache.remove_entry(&normalized).await?;
+                Ok(true)
+            }
+            None => Ok(false),
+        }
+    }
+
+    /// Remove clean cache entries at or below a prefix.
+    ///
+    /// This is used by distributed cache-invalidation events after a remote
+    /// instance mutates a file tree. It never deletes dirty local entries.
+    pub async fn invalidate_prefix(&self, path: &str) -> Result<usize> {
+        let normalized = normalize_path(path)?;
+        let prefix = dir_prefix(&normalized);
+        let mut removed = 0usize;
+
+        for entry in self.cache.iter_entries() {
+            if entry.dirty {
+                continue;
+            }
+
+            let matches = if normalized.is_empty() {
+                !entry.path.is_empty()
+            } else {
+                entry.path == normalized || entry.path.starts_with(&prefix)
+            };
+
+            if matches {
+                self.cache.remove_entry(&entry.path).await?;
+                removed += 1;
+            }
+        }
+
+        Ok(removed)
+    }
+
     pub async fn flush(&self) -> Result<usize> {
         let dirty = self.cache.dirty_entries();
         let mut ok = 0usize;

@@ -105,6 +105,61 @@ impl Default for SyncConfig {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct NatsConfig {
+    #[serde(default)]
+    pub enabled: bool,
+    #[serde(default = "default_nats_url")]
+    pub url: String,
+    #[serde(default = "default_nats_subject_prefix")]
+    pub subject_prefix: String,
+    #[serde(default)]
+    pub queue_group: Option<String>,
+    #[serde(default)]
+    pub instance_id: Option<String>,
+    #[serde(default = "default_nats_request_timeout_ms")]
+    pub request_timeout_ms: u64,
+    #[serde(default = "default_nats_max_payload_bytes")]
+    pub max_payload_bytes: usize,
+    #[serde(default = "default_nats_publish_events")]
+    pub publish_events: bool,
+}
+
+fn default_nats_url() -> String {
+    "nats://127.0.0.1:4222".to_string()
+}
+
+fn default_nats_subject_prefix() -> String {
+    "openfiles".to_string()
+}
+
+fn default_nats_request_timeout_ms() -> u64 {
+    30_000
+}
+
+fn default_nats_max_payload_bytes() -> usize {
+    10 * 1024 * 1024
+}
+
+fn default_nats_publish_events() -> bool {
+    true
+}
+
+impl Default for NatsConfig {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            url: default_nats_url(),
+            subject_prefix: default_nats_subject_prefix(),
+            queue_group: None,
+            instance_id: None,
+            request_timeout_ms: default_nats_request_timeout_ms(),
+            max_payload_bytes: default_nats_max_payload_bytes(),
+            publish_events: true,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct OpenFilesConfig {
     #[serde(default = "default_fs_id")]
     pub fs_id: String,
@@ -118,6 +173,8 @@ pub struct OpenFilesConfig {
     pub cache: CacheConfig,
     #[serde(default)]
     pub sync: SyncConfig,
+    #[serde(default)]
+    pub nats: NatsConfig,
 }
 
 fn default_fs_id() -> String {
@@ -133,6 +190,7 @@ impl Default for OpenFilesConfig {
             backend: BackendConfig::default(),
             cache: CacheConfig::default(),
             sync: SyncConfig::default(),
+            nats: NatsConfig::default(),
         }
     }
 }
