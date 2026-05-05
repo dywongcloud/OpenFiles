@@ -16,7 +16,7 @@ pub mod vendor;
 
 pub use backend::{LocalFsBackend, ObjectBackend, ObjectMeta, ObjectVersion};
 pub use cache::{Cache, CacheEntry};
-pub use config::{BackendConfig, OpenFilesConfig, ProviderKind};
+pub use config::{BackendConfig, NatsConfig, OpenFilesConfig, ProviderKind};
 pub use engine::OpenFilesEngine;
 pub use error::{OpenFilesError, Result};
 pub use types::{DirEntry, FileKind, FileStat, ImportDataRule, ImportTrigger};

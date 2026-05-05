@@ -1,6 +1,6 @@
-# OpenFiles
+# OpenS3Files
 
-OpenFiles is an open source, vendor-neutral object-backed shared file system standard and Rust implementation inspired by the public behavior of Amazon S3 Files.
+OpenS3Files is an open source, vendor-neutral object-backed shared file system standard and Rust implementation inspired by the public behavior of Amazon S3 Files.
 
 It gives file-oriented applications, agents, scripts, and WebAssembly components a POSIX-like filesystem view over object stores while keeping the object store as the durable source of truth.
 
@@ -32,6 +32,176 @@ cargo run -q  -p openfiles-cli -- --config ./openfiles.toml ls /
 cargo run -q  -p openfiles-cli -- --config ./openfiles.toml cat /hello.txt
 cargo run -q  -p openfiles-cli -- --config ./openfiles.toml flush
 ```
+# 🚀 OpenFiles Script Execution Examples
+
+## 🧠 Mental Model
+
+```
+OpenFiles (MinIO / S3 / Your Provider)
+        ↓ cat
+Local Shell (sh/bash)
+        ↓ executes
+OpenFiles CLI (for FS ops)
+```
+
+---
+
+## 📦 1. Create and run a simple script
+
+### Create script in OpenFiles
+
+```bash
+cargo run -q -p openfiles-cli -- --config ./openfiles.toml write /hello.sh '#!/bin/sh
+echo "Hello from OpenFiles!"
+'
+```
+
+### Execute it
+
+```bash
+cargo run -q -p openfiles-cli -- --config ./openfiles.toml cat /hello.sh | sh
+```
+
+---
+
+## 📂 2. Script that interacts with OpenFiles
+
+```bash
+cargo run -q -p openfiles-cli -- --config ./openfiles.toml write /ops.sh '#!/bin/sh
+
+OF="cargo run -q -p openfiles-cli -- --config ./openfiles.toml"
+
+echo "Creating files..."
+$OF write /a.txt "A"
+$OF write /b.txt "B"
+
+echo "Listing OpenFiles root:"
+$OF ls /
+
+echo "Reading files:"
+$OF cat /a.txt
+echo
+$OF cat /b.txt
+echo
+
+$OF flush
+'
+```
+
+### Run:
+
+```bash
+cargo run -q -p openfiles-cli -- --config ./openfiles.toml cat /ops.sh | sh
+```
+
+---
+
+## 🔁 3. Execute script and persist output back to OpenFiles
+
+```bash
+# create job script
+cargo run -q -p openfiles-cli -- --config ./openfiles.toml write /job.sh '#!/bin/sh
+echo "Job started"
+date
+echo "Processing..."
+sleep 1
+echo "Done"
+'
+
+# run + capture output
+cargo run -q -p openfiles-cli -- --config ./openfiles.toml cat /job.sh | sh > /tmp/job.out
+
+# upload output back into OpenFiles
+cargo run -q -p openfiles-cli -- --config ./openfiles.toml write /job-output.txt "$(cat /tmp/job.out)"
+
+# read result
+cargo run -q -p openfiles-cli -- --config ./openfiles.toml cat /job-output.txt
+```
+
+---
+
+## 🔗 4. Pipe OpenFiles data into Unix tools
+
+```bash
+# word count
+cargo run -q -p openfiles-cli -- --config ./openfiles.toml cat /hello.txt | wc -w
+
+# uppercase transform
+cargo run -q -p openfiles-cli -- --config ./openfiles.toml cat /hello.txt | tr a-z A-Z
+
+# grep
+cargo run -q -p openfiles-cli -- --config ./openfiles.toml cat /hello.txt | grep OpenFiles
+```
+
+---
+
+## ⚡ 5. One-liner remote execution pattern
+
+```bash
+cargo run -q -p openfiles-cli -- --config ./openfiles.toml cat /script.sh | sh
+```
+
+---
+
+## 🧪 6. Multi-step pipeline script
+
+```bash
+cargo run -q -p openfiles-cli -- --config ./openfiles.toml write /pipeline.sh '#!/bin/sh
+
+OF="cargo run -q -p openfiles-cli -- --config ./openfiles.toml"
+
+echo "Generating data..."
+$OF write /data.txt "alpha beta gamma delta"
+
+echo "Processing data..."
+RESULT=$($OF cat /data.txt | wc -w)
+
+echo "Word count: $RESULT"
+
+$OF write /result.txt "count=$RESULT"
+$OF flush
+'
+```
+
+Run:
+
+```bash
+cargo run -q -p openfiles-cli -- --config ./openfiles.toml cat /pipeline.sh | sh
+```
+
+Verify:
+
+```bash
+cargo run -q -p openfiles-cli -- --config ./openfiles.toml cat /result.txt
+```
+
+---
+
+## 🧰 7. Developer ergonomics (alias)
+
+```bash
+alias of='cargo run -q -p openfiles-cli -- --config ./openfiles.toml'
+```
+
+Then:
+
+```bash
+of write /test.sh '#!/bin/sh echo hi'
+of cat /test.sh | sh
+of ls /
+```
+
+---
+
+## ⚠️ Important Note
+
+Scripts are stored in OpenFiles but executed by the host shell.
+
+- `ls /` → host filesystem  
+- `of ls /` → OpenFiles filesystem  
+
+Always use the CLI inside scripts to interact with OpenFiles.
+
 
 The MinIO console is available at `http://localhost:9001` with the credentials in `examples/docker-compose.yml`.
 
@@ -62,6 +232,7 @@ Configuration files are under `examples/configs/`:
 
 | Vendor | Config file | Notes |
 |---|---|---|
+| Tencent COS | `tencent-cos.toml` | S3-compatible gateway endpoint. |
 | AWS S3 | `aws-s3.toml` | Native S3 through OpenDAL. Enable bucket versioning for best conflict behavior. |
 | GCP Cloud Storage | `gcp-gcs.toml` | Uses GCS service-account JSON or ADC. |
 | Azure Blob | `azure-blob.toml` | Uses account key or SAS token. |
